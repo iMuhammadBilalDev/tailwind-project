@@ -1,21 +1,52 @@
 import React, { useState } from "react";
-import {  toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom"; 
+
 function SignIn() {
-const [username,setusername] = useState("")
-const [password,setpassword] = useState("")
-    const handleclick = ()=>{
-      if (username.trim() === "" || password.trim() ===  ""){
-        toast.error("Please fill in both username and password",{
-          position:"top-right"
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate(); 
+
+  const handleClick = () => {
+    if (username.trim() === "" || password.trim() === "") {
+      toast.error("Please fill in both username and password", {
+        position: "top-right",
+      });
+    } else {
+      fetch('https://dummyjson.com/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+          expiresInMins: 30,
         })
-      }
-    else {
-      toast.success("successful sign in",{
-        position:"top-right"
-    });
+      })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data); 
+        if (data.token) {
+          toast.success("Successful SignIn", {
+            position: 'top-right'
+          });
+          navigate("/home");
+        } else {
+          toast.error("Invalid credentials", {
+            position: "top-right",
+          });
+        }
+      })
+      .catch((error) => {
+        console.log('Error:', error);
+        toast.error('Something went wrong', {
+          position: 'top-right'
+        });
+      });
     }
-    }
+  };
+
   return (
     <div className="flex justify-center items-center h-screen bg-slate-500">
       <div className="w-96 p-6 shadow-lg bg-white rounded-md">
@@ -30,7 +61,7 @@ const [password,setpassword] = useState("")
           type="text"
           id="username"
           value={username}
-          onChange={(e)=>setusername(e.target.value)}
+          onChange={(e) => setUsername(e.target.value)}
           className="border-2 w-full text-base px-2 py-1 mb-4 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-md"
           placeholder="Enter Username"
         />
@@ -43,7 +74,7 @@ const [password,setpassword] = useState("")
             type="password"
             id="password"
             value={password}
-            onChange={(e)=> setpassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             className="border-2 w-full text-base px-2 py-1 mb-4 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-md"
             placeholder="Enter Password"
           />
@@ -61,14 +92,17 @@ const [password,setpassword] = useState("")
           </a>
         </div>
 
-        <button className="border-2 bg-gray-900 text-white w-full rounded-md py-1 hover:bg-transparent hover:text-gray-600 font-semibold" onClick={handleclick}>
+        <button
+          className="border-2 bg-gray-900 text-white w-full rounded-md py-1 hover:bg-transparent hover:text-gray-600 font-semibold"
+          onClick={handleClick}
+        >
           Sign In
         </button>
-        <button className="border-2 bg-gray-900 text-white w-full rounded-md py-1 hover:bg-transparent hover:text-gray-600 font-semibold"  >
-            <Link to="/signup"> SignUp</Link>
+
+        <button className="border-2 bg-gray-900 text-white w-full rounded-md py-1 hover:bg-transparent hover:text-gray-600 font-semibold">
+          <Link to="/signup"> SignUp</Link>
         </button>
       </div>
-
     </div>
   );
 }
